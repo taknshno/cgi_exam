@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    <h1>テスト！！！！！！！！！！！！！</h1>
+    
+    <%# pgライブラリの読み込み %>
+    <% require 'pg' %>
+
+    <%# DBへの接続処理 %>
+    <% connection = PG::connect(dbname: "goya") %>
+    <% connection.internal_encoding = "UTF-8" %>
+
+    <!-- フォーム部分 -->
+    <%# list1: 「譲渡先が自家消費ではない」ものでフィルタリング %>
+    <% result = connection.exec("select * from crops where not give_for = '自家消費';") %>
+    <% data = [] %>
+
+    <% result.each do |record| %>
+      <%  data << "ゴーヤの長さ: #{record["length"]} ゴーヤの大きさ: #{record["weight"]} 品質: #{record["quality"]} 譲渡先: #{record["give_for"]} 日付: #{record["date"]}" %>
+    <% end %>
+
+    <form action="goya.cgi" method="POST">
+       下記のボタンを押すと、「譲渡先が自家消費ではない」ものでフィルタリングした<br>
+       ゴーヤの大きさと売った相手の情報ページに飛びます<br><br>
+      <input type="text" name="goya" value="<%= data.join(' ') %>">
+      <input type="submit" name="送信" >
+    </form>
+
+    <%# list2: 「品質が悪い」ものでフィルタリング %>
+    <% result2 = connection.exec("select * from crops where quality = false;") %>
+    <% data2 = [] %>
+
+    <% result2.each do |record| %>
+      <%  data2 << "ゴーヤの長さ: #{record["length"]} ゴーヤの大きさ: #{record["weight"]} 品質: #{record["quality"]} 譲渡先: #{record["give_for"]} 日付: #{record["date"]}" %>
+    <% end %>
+
+    <form action="goya.cgi" method="POST">
+       下記のボタンを押すと、「品質が悪い」ものでフィルタリングした<br>
+       ゴーヤの大きさと売った相手の情報ページに飛びます<br><br>
+      <input type="text" name="goya" value="<%= data2.join(' ') %>">
+      <input type="submit" name="送信" >
+    </form>
+  </body>
+</html>
